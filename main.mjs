@@ -7,14 +7,18 @@ const H = 3/4 * W;
 const cv = new Canvas([W, H]);
 const sv = new Solver([0, 98]);
 
-const c1 = new Circle([W/2, H/10], 10, 'yellow');
-//const c2 = new Circle([250, 150], 45, 'orange');
-cv.addObject(c1);
-//cv.addObject(c2);
-//cv.drawFrame();
-sv.addObject(c1);
+const c0 = new Circle([400, 300], 300, 'black'); // constraint
 
-//cv.drawFrame();
+const c1 = new Circle([W * 0.33, H * 0.5], 30, 'yellow');
+const c2 = new Circle([W * 0.70, H * 0.3], 30, 'orange');
+
+cv.addObject(c0);
+
+cv.addObject(c1);
+cv.addObject(c2);
+
+sv.addObject(c1);
+sv.addObject(c2);
 
 //let tPrev = -1000 / 60;
 let tPrev = -1 / 60;
@@ -35,9 +39,3 @@ function onTick(t) {
 }
 
 onTick(0);
-
-/*
-window.cv = cv;
-window.sv = sv;
-window.c1 = c1;
-*/

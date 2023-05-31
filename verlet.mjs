@@ -30,6 +30,25 @@ export class VerletObject {
     }
 }
 
+function dist([x, y], [z, w]) {
+    const dx = x - z;
+    const dy = y - w;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function distSquared([x, y], [z, w]) {
+    const dx = x - z;
+    const dy = y - w;
+    return dx * dx + dy * dy;
+}
+
+function mulVec(scalar, [x, y]) {
+    return [
+        scalar * x,
+        scalar * y
+    ];
+}
+
 export class Solver {
     constructor(gravity = [0, 1000]) {
         this.g = Array.from(gravity);
@@ -42,6 +61,7 @@ export class Solver {
 
     update(dt) {
         this.applyGravity();
+        this.applyConstraint();
         this.updatePositions(dt);
     }
 
@@ -57,5 +77,20 @@ export class Solver {
         }
     }
 
-
+    applyConstraint() {
+        const pos = [400, 300];
+        const r = 300;
+        for (const o of this.objects) {
+            const toO = [
+                o.pos[0] - pos[0],
+                o.pos[1] - pos[1]
+            ];
+            const di = dist(toO, [0, 0]);
+            if (di > r - o.r) {
+                const versor = mulVec(1 / di, toO);
+                o.pos[0] = pos[0] + versor[0] * (r - o.r);
+                o.pos[1] = pos[1] + versor[1] * (r - o.r);
+            }
+        }
+    }
 }
