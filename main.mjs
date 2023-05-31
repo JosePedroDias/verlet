@@ -1,5 +1,6 @@
 import { Canvas, Circle } from "./canvas.mjs";
 import { Solver } from "./verlet.mjs";
+import { relativePointerPos, rndI } from "./misc.mjs";
 
 const W = 800;
 const H = 3/4 * W;
@@ -17,17 +18,14 @@ const entities = [
 
 // add circle on click
 cv.el.addEventListener('click', (ev) => {
-    const { left, top } = cv.el.getBoundingClientRect();
-    const x = ev.pageX - left;
-    const y = ev.pageY - top;
-    const to255 = () => Math.floor(255 * Math.random());
+    const [x, y] = relativePointerPos(ev, cv.el);
+    const to255 = () => rndI(255);
     const color = `rgb(${to255()}, ${to255()}, ${to255()}`;
-    const r = 15 + Math.floor(30 * Math.random());
+    const r = 15 + rndI(30);
 
     const o = new Circle([x, y], r, color);
     cv.addObject(o);
     sv.addObject(o);
-    //console.log([x, y]);
 });
 
 cv.addObject(c0);
@@ -48,7 +46,7 @@ function onTick(t) {
 
     //console.log(`dt: ${dt.toFixed(3)} | t: ${t.toFixed(3)}`);
 
-    sv.update(dt);
+    sv.update(dt * 2); // sped it up 2x
     cv.drawFrame();
 
     tPrev = t;

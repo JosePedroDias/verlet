@@ -1,3 +1,5 @@
+import { subVec, dist, mulVec, combine2 } from './misc.mjs';
+
 export class VerletObject {
     constructor(pos = [0, 0], accel = [0, 0]) {
         this.pos = Array.from(pos);
@@ -6,10 +8,7 @@ export class VerletObject {
     }
 
     updatePosition(dt) {
-        const vel = [
-            this.pos[0] - this.posPrev[0],
-            this.pos[1] - this.posPrev[1]
-        ];
+        const vel = subVec(this.pos, this.posPrev)
 
         // save current position
         this.posPrev[0] = this.pos[0];
@@ -30,37 +29,6 @@ export class VerletObject {
     }
 }
 
-function addVec([x, y], [z, w]) {
-    return [x + z, y + w];
-}
-
-function subVec([x, y], [z, w]) {
-    return [x - z, y - w];
-}
-
-function dist([x, y], [z, w]) {
-    const dx = x - z;
-    const dy = y - w;
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-function mulVec(scalar, [x, y]) {
-    return [
-        scalar * x,
-        scalar * y
-    ];
-}
-
-function* combine2(n) {
-    for (let i = 0; i < n; ++i) {
-        for (let j = 0; j < n; ++j) {
-            if (i < j) {
-                yield [i, j];
-            }
-        }   
-    }
-}
-
 export class Solver {
     constructor(gravity = [0, 1000]) {
         this.g = Array.from(gravity);
@@ -72,10 +40,15 @@ export class Solver {
     }
 
     update(dt) {
-        this.applyGravity();
-        this.applyConstraint();
-        this.solveCollisions();
-        this.updatePositions(dt);
+        const subSteps = 8; // 1, 2, 4, 8
+        const subDt = dt / subSteps;
+
+        for (let i = 0; i < subSteps; ++i) {
+            this.applyGravity();
+            this.applyConstraint();
+            this.solveCollisions();
+            this.updatePositions(subDt);
+        }
     }
 
     updatePositions(dt) {
