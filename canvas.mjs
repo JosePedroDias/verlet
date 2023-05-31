@@ -1,5 +1,7 @@
 const PI2 = 2 * Math.PI;
 
+import { VerletObject } from "./verlet.mjs";
+
 export class Canvas {
     constructor(dims = [400, 300]) {
         this.dims = Array.from(dims);
@@ -25,10 +27,10 @@ export class Canvas {
     }
 }
 
-export class Circle {
-    constructor(r = 10, pos = [0, 0], color = 'red') {
+export class Circle extends VerletObject {
+    constructor(pos = [0, 0], r = 10, color = 'red') {
+        super(pos);
         this.r = r;
-        this.pos = Array.from(pos);
         this.color = color;
     }
 
