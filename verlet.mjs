@@ -30,16 +30,18 @@ export class VerletObject {
     }
 }
 
+function addVec([x, y], [z, w]) {
+    return [x + z, y + w];
+}
+
+function subVec([x, y], [z, w]) {
+    return [x - z, y - w];
+}
+
 function dist([x, y], [z, w]) {
     const dx = x - z;
     const dy = y - w;
     return Math.sqrt(dx * dx + dy * dy);
-}
-
-function distSquared([x, y], [z, w]) {
-    const dx = x - z;
-    const dy = y - w;
-    return dx * dx + dy * dy;
 }
 
 function mulVec(scalar, [x, y]) {
@@ -47,6 +49,16 @@ function mulVec(scalar, [x, y]) {
         scalar * x,
         scalar * y
     ];
+}
+
+function* combine2(n) {
+    for (let i = 0; i < n; ++i) {
+        for (let j = 0; j < n; ++j) {
+            if (i < j) {
+                yield [i, j];
+            }
+        }   
+    }
 }
 
 export class Solver {
@@ -62,6 +74,7 @@ export class Solver {
     update(dt) {
         this.applyGravity();
         this.applyConstraint();
+        this.solveCollisions();
         this.updatePositions(dt);
     }
 
@@ -81,15 +94,34 @@ export class Solver {
         const pos = [400, 300];
         const r = 300;
         for (const o of this.objects) {
-            const toO = [
-                o.pos[0] - pos[0],
-                o.pos[1] - pos[1]
-            ];
+            const toO = subVec(o.pos, pos);
             const di = dist(toO, [0, 0]);
             if (di > r - o.r) {
                 const versor = mulVec(1 / di, toO);
                 o.pos[0] = pos[0] + versor[0] * (r - o.r);
                 o.pos[1] = pos[1] + versor[1] * (r - o.r);
+            }
+        }
+    }
+
+    solveCollisions() {
+        for (const [i, j] of combine2(this.objects.length)) {
+            const o = this.objects[i];
+            const O = this.objects[j];
+
+            const collAxis = subVec(o.pos, O.pos);
+            const di = dist(collAxis, [0, 0]);
+            const minDist = o.r + O.r;
+
+            if (di < minDist) {
+                const versor = mulVec(1/di, collAxis);
+                const delta = minDist - di;
+
+                o.pos[0] += 0.5 * delta * versor[0];
+                o.pos[1] += 0.5 * delta * versor[1];
+
+                O.pos[0] -= 0.5 * delta * versor[0];
+                O.pos[1] -= 0.5 * delta * versor[1];
             }
         }
     }

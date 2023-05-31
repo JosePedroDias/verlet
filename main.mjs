@@ -9,16 +9,17 @@ const sv = new Solver([0, 98]);
 
 const c0 = new Circle([400, 300], 300, 'black'); // constraint
 
-const c1 = new Circle([W * 0.33, H * 0.5], 30, 'yellow');
-const c2 = new Circle([W * 0.70, H * 0.3], 30, 'orange');
+const entities = [
+    new Circle([W * 0.33, H * 0.5], 30, 'yellow'),
+    new Circle([W * 0.70, H * 0.3], 30, 'orange'),
+    new Circle([W * 0.55, H * 0.4], 40, 'red')
+];
 
 cv.addObject(c0);
-
-cv.addObject(c1);
-cv.addObject(c2);
-
-sv.addObject(c1);
-sv.addObject(c2);
+for (const o of entities) {
+    cv.addObject(o);
+    sv.addObject(o);
+}
 
 //let tPrev = -1000 / 60;
 let tPrev = -1 / 60;
