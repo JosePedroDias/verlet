@@ -15,6 +15,21 @@ const entities = [
     new Circle([W * 0.55, H * 0.4], 40, 'red')
 ];
 
+// add circle on click
+cv.el.addEventListener('click', (ev) => {
+    const { left, top } = cv.el.getBoundingClientRect();
+    const x = ev.pageX - left;
+    const y = ev.pageY - top;
+    const to255 = () => Math.floor(255 * Math.random());
+    const color = `rgb(${to255()}, ${to255()}, ${to255()}`;
+    const r = 15 + Math.floor(30 * Math.random());
+
+    const o = new Circle([x, y], r, color);
+    cv.addObject(o);
+    sv.addObject(o);
+    //console.log([x, y]);
+});
+
 cv.addObject(c0);
 for (const o of entities) {
     cv.addObject(o);
