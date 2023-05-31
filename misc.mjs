@@ -29,6 +29,12 @@ export function* combine2(n) {
     }
 }
 
+export function* pairs(n) {
+    for (let i = 0; i < n - 1; ++i) {
+        yield [i, i + 1];
+    }
+}
+
 export function relativePointerPos(ev, el) {
     const { left, top } = el.getBoundingClientRect();
     const x = ev.pageX - left;
