@@ -8,7 +8,9 @@ const H = 3/4 * W;
 const cv = new Canvas([W, H]);
 const sv = new Solver(8);
 
-if (false) { // circles inside a circle
+const experimentNo = location.search ? parseInt(location.search.substring(1), 10) : 0;
+
+if (experimentNo === 0) { // circles inside a circle
     const entities = [
         new Circle([W * 0.33, H * 0.5], 30, 'yellow'),
         new Circle([W * 0.70, H * 0.3], 30, 'orange'),
@@ -43,7 +45,7 @@ if (false) { // circles inside a circle
         sv.addObject(o);
     }
 }
-else if (false) { // chain with 1 pinned end
+else if (experimentNo === 1) { // chain with 1 pinned end
     const numEntities = 8;
     const p0 = [W * 0.5, H * 0.2];
     const dp = [W * 0.04, 0];
@@ -73,11 +75,11 @@ else if (false) { // chain with 1 pinned end
         sv.addConstraint( new LinkConstraint(entities[i], entities[j], td) );    
     }
 }
-else if (true) { // chain with 2 pinned ends and circles inside a circle
-    const numEntities = 12;
+else if (experimentNo === 2) { // chain with 2 pinned ends and circles inside a circle
+    const numEntities = 23;
     const p0 = [W * 0.2, H * 0.45];
-    const dp = [W * 0.055, 0];
-    const r = W * 0.02;
+    const dp = [W * 0.0275, 0];
+    const r = W * 0.014;
     const lastI = numEntities - 1;
 
     const entities = [];
@@ -116,7 +118,7 @@ else if (true) { // chain with 2 pinned ends and circles inside a circle
         const [x, y] = relativePointerPos(ev, cv.el);
         const to255 = () => rndI(255);
         const color = `rgb(${to255()}, ${to255()}, ${to255()}`;
-        const r = 15 + rndI(30);
+        const r = 10 + rndI(25);
 
         const o = new Circle([x, y], r, color);
         cv.addObject(o);
@@ -126,7 +128,6 @@ else if (true) { // chain with 2 pinned ends and circles inside a circle
     });
 }
 
-//let tPrev = -1000 / 60;
 let tPrev = -1 / 60;
 
 function onTick(t) {
@@ -136,9 +137,9 @@ function onTick(t) {
 
     const dt = t - tPrev;
 
-    //console.log(`dt: ${dt.toFixed(3)} | t: ${t.toFixed(3)}`);
+    document.title = `exp #${experimentNo} | fps: ${(1 / dt).toFixed(1)}`;
 
-    sv.update(dt * 2); // sped it up 2x
+    sv.update(dt * 2.5); // sped it up 2.5x
     cv.drawFrame();
 
     tPrev = t;
