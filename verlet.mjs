@@ -121,8 +121,8 @@ export class LinearForce {
 }
 
 export class FixedConstraint {
-    constructor(center = [0, 0], objects = []) {
-        this.center = Array.from(center);
+    constructor(center = [0, 0], objects = [], dontCopy = false) {
+        this.center = dontCopy ? center : Array.from(center); //we want to be able to keep the instance instead of copying
         this.objects = Array.from(objects);
     }
 

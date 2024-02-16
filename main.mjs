@@ -1,10 +1,11 @@
-let sv, cv;
+let sv, cv, onTickInner;
 
 const experimentNo = location.search ? parseInt(location.search.substring(1), 10) : 0;
 await import(`./${experimentNo}.mjs`).then((mod) => {
     const result = mod.setup();
     sv = result.sv;
     cv = result.cv;
+    onTickInner = result.onTick;
 });
 
 
@@ -21,6 +22,7 @@ function onTick(t) {
     document.title = `exp #${experimentNo} | fps: ${(1 / dt).toFixed(1)}`;
 
     sv.update(dt * 2.5); // sped it up 2.5x
+    onTickInner && onTickInner(dt, t);
     cv.drawFrame();
 
     tPrev = t;

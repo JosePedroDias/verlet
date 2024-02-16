@@ -1,5 +1,6 @@
 body {
     background: #222;
+    user-select: none;
 }
 
 canvas {
