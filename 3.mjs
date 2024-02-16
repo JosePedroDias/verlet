@@ -15,9 +15,9 @@ export function setup() {
 
     const movingEntities = [];
 
-    const r0 = new Rectangle([W/2, H/2], [0.82 * W, 0.95 * H], 'black'); // constraint visual only
+    const r0 = new Rectangle([W/2, H/2], [0.82 * W, 0.86 * H], 'black'); // constraint visual only
     cv.addObject(r0);
-    const rectConst = new RectangularConstraint([W/2, H/2], [0.82 * W, 0.95 * H], movingEntities);
+    const rectConst = new RectangularConstraint([W/2, H/2], [0.82 * W, 0.86 * H], movingEntities);
     sv.addConstraint(rectConst);
 
     const PEG_R = 4;
@@ -41,7 +41,7 @@ export function setup() {
         const o = new Circle(
             [
                 W * 0.5 + (0.2 * Math.random() - 0.1),
-                H * 0.05
+                H * 0.09
             ],
             BALL_R,
             randomColor()
@@ -57,7 +57,7 @@ export function setup() {
         const cx = W * 0.5;
         const cy = H * 0.5;
         const dx = W * 0.07;
-        const dy = dx;
+        const dy = dx * 0.85;
         for (let yi = -7; yi <= 7; ++yi) {
             for (let xi = -6; xi <= 5; ++xi) {
                 const isOddY = yi % 2 !== 0;
@@ -75,11 +75,11 @@ export function setup() {
         for (let xi = -5; xi <= 5; ++xi) {
             generateLine({
                 x0: cx + xi * dx,
-                y0: H * 0.88,
+                y0: H * 0.83,
                 dx: 0,
                 dy: 10,
-                r: 5,
-                n : 9,
+                r: 4,
+                n : 10,
                 color: 'gray',
             });
         }

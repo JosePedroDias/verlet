@@ -1,3 +1,5 @@
+export const RAD2DEG = 180 / Math.PI;
+
 export function addVec([x, y], [z, w]) {
     return [x + z, y + w];
 }
@@ -19,13 +21,18 @@ export function mulVec(scalar, [x, y]) {
     ];
 }
 
+export function setVec(to, from) {
+    to[0] = from[0];
+    to[1] = from[1];
+}
+
 export function* combine2(n) {
     for (let i = 0; i < n; ++i) {
         for (let j = 0; j < n; ++j) {
             if (i < j) {
                 yield [i, j];
             }
-        }   
+        }
     }
 }
 
