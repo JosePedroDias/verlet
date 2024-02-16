@@ -1,0 +1,25 @@
+body {
+    background: #222;
+}
+
+canvas {
+    /* border: 1px solid red; */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+div {
+    margin-bottom: 20px;
+}
+
+a {
+    font-family: sans-serif;
+    color: white;
+    font-weight: bold;
+}
+
+a:visited {
+    color: #ddd;
+}
