@@ -88,6 +88,8 @@ export class Solver {
             const minDist = o.r + O.r;
 
             if (di < minDist) {
+                // TODO potential onCollisionEventCallback goes here
+
                 const versor = mulVec(1/di, collAxis);
                 const delta = minDist - di;
 
@@ -149,6 +151,53 @@ export class CircularConstraint {
                 o.pos[0] = pos[0] + versor[0] * (r - o.r);
                 o.pos[1] = pos[1] + versor[1] * (r - o.r);
             }
+        }
+    }
+
+    addObject(o) {
+        this.objects.push(o);
+    }
+}
+
+export class RectangularConstraint {
+    constructor(center = [0, 0], dims = [100, 100], objects = []) {
+        this.center = Array.from(center);
+        this.halfDims = Array.from(dims).map(v => v/2);
+        this.objects = Array.from(objects);
+    }
+
+    apply_() {
+        const pos = this.center;
+        const hDims = this.halfDims;
+
+        for (const o of this.objects) {
+            const oPos = o.pos;
+
+            let x0 = pos[0] - hDims[0] + o.r;
+            let x1 = pos[0] + hDims[0] - o.r;
+            let y0 = pos[1] - hDims[1] + o.r;
+            let y1 = pos[1] + hDims[1] - o.r;
+
+            if      (oPos[0] < x0) oPos[0] = x0;
+            else if (oPos[0] > x1) oPos[0] = x1;
+
+            if      (oPos[1] < y0) oPos[1] = y0;
+            else if (oPos[1] > y1) oPos[1] = y1;
+
+            /*let vec = [0, 0];
+
+            if      (oPos[0] < x0) vec[0] =  Math.abs(pos[0] - x0);
+            else if (oPos[0] > x1) vec[0] = -Math.abs(pos[0] - x1);
+
+            if      (oPos[1] < y0) vec[1] =  Math.abs(pos[1] - y0);
+            else if (oPos[1] > y1) vec[1] = -Math.abs(pos[1] - y1);
+
+            //console.log(vec)
+
+            if (vec[0] !== 0 || vec[1] !== 0) {
+                console.log(`${vec[0].toFixed(2)} | ${vec[1].toFixed(2)}`);
+                o.pos = addVec(o.pos, vec);
+            }*/
         }
     }
 

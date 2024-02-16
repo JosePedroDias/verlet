@@ -41,3 +41,21 @@ export class Circle extends VerletObject {
         ctx.fill();
     }
 }
+
+export class Rectangle extends VerletObject {
+    constructor(pos = [0, 0], dims = [100, 100], color = 'red') {
+        super(pos);
+        this.dims = dims;
+        this.color = color;
+    }
+
+    render(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(
+            this.pos[0] - this.dims[0]/2,
+            this.pos[1] - this.dims[1]/2,
+            this.dims[0],
+            this.dims[1],
+        );
+    }
+}
