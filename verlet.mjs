@@ -1,4 +1,4 @@
-import { subVec, dist, mulVec, combine2 } from './misc.mjs';
+import { subVec, dist, mulVec, combine2, addVec } from './misc.mjs';
 
 export class VerletObject {
     constructor(pos = [0, 0], accel = [0, 0]) {
@@ -95,6 +95,7 @@ export class Solver {
     solveCollisions() {
         const totalObjects = this.objects.length;
         let computedCollisions = 0;
+
         for (const [i, j] of combine2(totalObjects)) {
             const o = this.objects[i];
             const O = this.objects[j];
@@ -103,7 +104,7 @@ export class Solver {
             ++computedCollisions;
 
             const collAxis = subVec(o.pos, O.pos);
-            const di = dist(collAxis, [0, 0]);
+            const di = dist(collAxis);
             const minDist = o.r + O.r;
 
             if (di < minDist) {
@@ -119,6 +120,7 @@ export class Solver {
                 O.pos[1] -= 0.5 * delta * versor[1];
             }
         }
+
         //console.log(computedCollisions, totalObjects);
     }
 }
@@ -165,7 +167,7 @@ export class CircularConstraint {
         const r = this.r;
         for (const o of this.objects) {
             const toO = subVec(o.pos, pos);
-            const di = dist(toO, [0, 0]);
+            const di = dist(toO);
             if (di !== 0 && di > r - o.r) {
                 const versor = mulVec(1 / di, toO);
                 o.pos[0] = pos[0] + versor[0] * (r - o.r);
@@ -198,26 +200,21 @@ export class RectangularConstraint {
             let y0 = pos[1] - hDims[1] + o.r;
             let y1 = pos[1] + hDims[1] - o.r;
 
+            // stops axis movement
             if      (oPos[0] < x0) oPos[0] = x0;
             else if (oPos[0] > x1) oPos[0] = x1;
 
             if      (oPos[1] < y0) oPos[1] = y0;
             else if (oPos[1] > y1) oPos[1] = y1;
 
-            /*let vec = [0, 0];
+            /* const fact = 1;
+            //const fact = dist(o.vel);
 
-            if      (oPos[0] < x0) vec[0] =  Math.abs(pos[0] - x0);
-            else if (oPos[0] > x1) vec[0] = -Math.abs(pos[0] - x1);
+            if      (oPos[0] < x0) oPos[0] += fact * (x0 - oPos[0]);
+            else if (oPos[0] > x1) oPos[0] += fact * (x1 - oPos[0]);
 
-            if      (oPos[1] < y0) vec[1] =  Math.abs(pos[1] - y0);
-            else if (oPos[1] > y1) vec[1] = -Math.abs(pos[1] - y1);
-
-            //console.log(vec)
-
-            if (vec[0] !== 0 || vec[1] !== 0) {
-                console.log(`${vec[0].toFixed(2)} | ${vec[1].toFixed(2)}`);
-                o.pos = addVec(o.pos, vec);
-            }*/
+            if      (oPos[1] < y0) oPos[1] += fact * (y0 - oPos[1]);
+            else if (oPos[1] > y1) oPos[1] += fact * (y1 - oPos[1]); */
         }
     }
 
@@ -235,7 +232,7 @@ export class LinkConstraint {
 
     apply_() {
         const axis = subVec(this.o.pos, this.O.pos);
-        const di = dist(axis, [0, 0]);
+        const di = dist(axis);
         const versor = mulVec(1 / di, axis);
         const delta = this.targetDi - di;
 

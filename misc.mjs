@@ -8,10 +8,14 @@ export function subVec([x, y], [z, w]) {
     return [x - z, y - w];
 }
 
-export function dist([x, y], [z, w]) {
+export function distBetween([x, y], [z, w]) {
     const dx = x - z;
     const dy = y - w;
     return Math.sqrt(dx * dx + dy * dy);
+}
+
+export function dist([x, y]) {
+    return Math.sqrt(x * x + y * y);
 }
 
 export function mulVec(scalar, [x, y]) {
