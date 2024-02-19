@@ -30,8 +30,15 @@ export class VerletObject {
 }
 
 export class Solver {
-    constructor(subSteps = 1) {
+    constructor(
+        subSteps = 1,
+        onCollisionFn = undefined,
+        requiresCollisionFn = undefined
+    ) {
         this.subSteps = subSteps;
+        this.onCollisionFn = onCollisionFn;
+        this.requiresCollisionFn = requiresCollisionFn;
+
         this.forces = [];
         this.constraints = [];
         this.objects = [];
@@ -43,6 +50,13 @@ export class Solver {
 
     addConstraint(c) {
         this.constraints.push(c);
+    }
+
+    removeConstraint(c) {
+        const idx = this.constraints.indexOf(c);
+        if (idx === -1) return;
+        //console.log('removing constraint', idx, 'out of', this.constraints.length);
+        this.constraints.splice(idx, 1);
     }
 
     addObject(o) {
@@ -79,16 +93,21 @@ export class Solver {
     }
 
     solveCollisions() {
-        for (const [i, j] of combine2(this.objects.length)) {
+        const totalObjects = this.objects.length;
+        let computedCollisions = 0;
+        for (const [i, j] of combine2(totalObjects)) {
             const o = this.objects[i];
             const O = this.objects[j];
+
+            if (this.requiresCollisionFn && !this.requiresCollisionFn(o, O)) continue;
+            ++computedCollisions;
 
             const collAxis = subVec(o.pos, O.pos);
             const di = dist(collAxis, [0, 0]);
             const minDist = o.r + O.r;
 
             if (di < minDist) {
-                // TODO potential onCollisionEventCallback goes here
+                this.onCollisionFn && this.onCollisionFn(o, O);
 
                 const versor = mulVec(1/di, collAxis);
                 const delta = minDist - di;
@@ -100,6 +119,7 @@ export class Solver {
                 O.pos[1] -= 0.5 * delta * versor[1];
             }
         }
+        //console.log(computedCollisions, totalObjects);
     }
 }
 

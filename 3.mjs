@@ -3,7 +3,10 @@ import { RectangularConstraint, FixedConstraint, LinearForce, Solver } from './v
 import { relativePointerPos, rndI } from './misc.mjs';
 
 const to255 = () => 55 + rndI(200);
-const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()}`;
+const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()})`;
+
+//const KIND_AUX = 0;
+const KIND_MOVING = 1;
 
 // plinko
 export function setup() {
@@ -11,7 +14,15 @@ export function setup() {
     const H = 1.5 * W;
 
     const cv = new Canvas([W, H]);
-    const sv = new Solver(2);
+    const sv = new Solver(
+        2, // subSteps
+        (a, b) => { // onCollisionFn
+            //console.log(a.color, b.color);
+        },
+        (a, b) => { // requiresCollisionFn
+            return a.kind === KIND_MOVING || b.kind === KIND_MOVING;
+        },
+    );
 
     const movingEntities = [];
 
@@ -46,6 +57,7 @@ export function setup() {
             BALL_R,
             randomColor()
         );
+        o.kind = KIND_MOVING;
         movingEntities.push(o);
         cv.addObject(o);
         sv.addObject(o);
@@ -92,6 +104,7 @@ export function setup() {
     cv.el.addEventListener('click', (ev) => {
         const pos = relativePointerPos(ev, cv.el);
         const o = new Circle(pos, BALL_R, randomColor());
+        o.kind = KIND_MOVING;
         cv.addObject(o);
         sv.addObject(o);
         gravityF.addObject(o);

@@ -3,7 +3,7 @@ import { RectangularConstraint, FixedConstraint, LinearForce, Solver } from './v
 import { RAD2DEG, addVec, subVec, mulVec, setVec, relativePointerPos, rndI } from './misc.mjs';
 
 const to255 = () => 55 + rndI(200);
-const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()}`;
+const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()})`;
 
 class Cannon {
     constructor(pos, width = 60, thickness = 20, color = 'red') {
@@ -43,6 +43,10 @@ class Cannon {
         ctx.stroke();
     }
 }
+
+//const KIND_AUX = 0;
+const KIND_MOVING = 1;
+const KIND_FIXED_ON_RING = 2;
 
 // shooter
 export function setup() {
@@ -103,14 +107,34 @@ export function setup() {
 
     const ADD_CENTER_BALL = false;
 
-    const cv = new Canvas([W, H]);
-    const sv = new Solver(2);
-
     const movingEntities = [];
+    const rectConst = new RectangularConstraint([W/2, H/2], [0.82 * W, 0.86 * H], movingEntities);
+
+    const cv = new Canvas([W, H]);
+    const sv = new Solver(
+        2, // subSteps
+        (a, b) => { // onCollisionFn
+            let ringBall;
+            if      (a.kind === KIND_FIXED_ON_RING) ringBall = a;
+            else if (b.kind === KIND_FIXED_ON_RING) ringBall = b;
+
+            if (!ringBall) return;
+
+            ringBall.kind = KIND_MOVING;
+            gravityF.addObject(ringBall);
+            rectConst.addObject(ringBall);
+            sv.removeConstraint(ringBall.constraint);
+            delete ringBall.constraint;
+        },
+        (a, b) => { // requiresCollisionFn
+            //return true;
+            return a.kind === KIND_MOVING || b.kind === KIND_MOVING;
+        },
+    );
 
     const rect0 = new Rectangle([W/2, H/2], [0.82 * W, 0.86 * H], 'black');
     cv.addObject(rect0);
-    const rectConst = new RectangularConstraint([W/2, H/2], [0.82 * W, 0.86 * H], movingEntities);
+
     sv.addConstraint(rectConst);
 
     const cannon = new Cannon(Array.from(ORIGIN), 60, 20, 'gray');
@@ -123,7 +147,6 @@ export function setup() {
         const o = new Circle(CENTER, CENTER_BALL_R, randomColor());
         cv.addObject(o);
         sv.addObject(o);
-        gravityF.addObject(o);
         rectConst.addObject(o);
         sv.addConstraint( new FixedConstraint(o.pos, [o]) );
     }
@@ -135,13 +158,13 @@ export function setup() {
         for (let j = 0; j < amount; ++j) {
             const pos = Array.from(FIXED_BALL_POSITIONS[k]);
             const o = new Circle(pos, BALL_R, randomColor());
+            o.kind = KIND_FIXED_ON_RING;
             cv.addObject(o);
             sv.addObject(o);
 
-            //gravityF.addObject(o);
-            //rectConst.addObject(o);
-
-            sv.addConstraint( new FixedConstraint(FIXED_BALL_POSITIONS[k], [o], true) );
+            const constraint = new FixedConstraint(FIXED_BALL_POSITIONS[k], [o], true);
+            o.constraint = constraint;
+            sv.addConstraint(constraint);
             ++k;
         }
     }
@@ -170,6 +193,7 @@ export function setup() {
     cv.el.addEventListener('click', () => {
         const pos = addVec(ORIGIN, mulVec(cannon.width, cannon.getVersor()));
         const o = new Circle(pos, BALL_R, randomColor());
+        o.kind = KIND_MOVING;
         o.accel = mulVec(13000, cannon.getVersor());
         cv.addObject(o);
         sv.addObject(o);

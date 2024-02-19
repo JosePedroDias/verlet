@@ -11,16 +11,13 @@ canvas {
     transform: translate(-50%, -50%);
 }
 
-div {
-    margin-bottom: 20px;
-}
-
-a {
+#experiences a {
+    display: block;
     font-family: sans-serif;
     color: white;
     font-weight: bold;
 }
 
-a:visited {
+#experiences a:visited {
     color: #ddd;
 }

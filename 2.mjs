@@ -25,7 +25,7 @@ export function setup() {
         entities.push(c);
     }
 
-    const c0 = new Circle([W/2, H/2], H/2, 'black'); // constraint visual only
+    const c0 = new Circle([W/2, H/2], H/2, 'black');
     cv.addObject(c0);
 
     const cc = new CircularConstraint([W/2, H/2], H/2, entities);
