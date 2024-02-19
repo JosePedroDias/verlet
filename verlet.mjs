@@ -66,6 +66,8 @@ export class Solver {
     update(dt) {
         const subDt = dt / this.subSteps;
 
+        this.dt = subDt; // so we can use it in collision callbacks, etc.
+
         for (let i = 0; i < this.subSteps; ++i) {
             this.applyForces();
             this.applyConstraints();

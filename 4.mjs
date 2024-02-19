@@ -1,6 +1,6 @@
 import { Canvas, Circle, Rectangle } from './canvas.mjs';
-import { RectangularConstraint, FixedConstraint, LinearForce, Solver } from './verlet.mjs';
-import { RAD2DEG, addVec, subVec, mulVec, setVec, relativePointerPos, rndI } from './misc.mjs';
+import { FixedConstraint, LinearForce, Solver } from './verlet.mjs';
+import { addVec, dist, subVec, mulVec, setVec, relativePointerPos, rndI } from './misc.mjs';
 
 const to255 = () => 55 + rndI(200);
 const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()})`;
@@ -47,6 +47,9 @@ class Cannon {
 //const KIND_AUX = 0;
 const KIND_MOVING = 1;
 const KIND_FIXED_ON_RING = 2;
+
+const ANGLED_BASE_COLOR = 'gray';
+const EDGES_COLOR = undefined;// 'gray';
 
 // shooter
 export function setup() {
@@ -97,7 +100,7 @@ export function setup() {
         let y = y0;
         for (let i = 0; i < n; ++i) {
             const o = new Circle([x, y], r, color);
-            cv.addObject(o);
+            if (color) cv.addObject(o);
             sv.addObject(o);
             sv.addConstraint( new FixedConstraint(o.pos, [o]) );
             x += dx;
@@ -108,7 +111,6 @@ export function setup() {
     const ADD_CENTER_BALL = false;
 
     const movingEntities = [];
-    const rectConst = new RectangularConstraint([W/2, H/2], [0.82 * W, 0.86 * H], movingEntities);
 
     const cv = new Canvas([W, H]);
     const sv = new Solver(
@@ -120,22 +122,25 @@ export function setup() {
 
             if (!ringBall) return;
 
+            // only break apart if ball's velocity above some threshold
+            const otherBall = ringBall === a ? b : a;
+            const otherVelArr = subVec(otherBall.pos, otherBall.posPrev);
+            const otherVel = dist(otherVelArr) * sv.dt;
+            if (otherVel < 0.03) return;
+            //console.log(`otherVel: ${otherVel.toFixed(3)}`);
+
             ringBall.kind = KIND_MOVING;
             gravityF.addObject(ringBall);
-            rectConst.addObject(ringBall);
             sv.removeConstraint(ringBall.constraint);
             delete ringBall.constraint;
         },
         (a, b) => { // requiresCollisionFn
-            //return true;
             return a.kind === KIND_MOVING || b.kind === KIND_MOVING;
         },
     );
 
     const rect0 = new Rectangle([W/2, H/2], [0.82 * W, 0.86 * H], 'black');
     cv.addObject(rect0);
-
-    sv.addConstraint(rectConst);
 
     const cannon = new Cannon(Array.from(ORIGIN), 60, 20, 'gray');
     cv.addObject(cannon);
@@ -147,7 +152,6 @@ export function setup() {
         const o = new Circle(CENTER, CENTER_BALL_R, randomColor());
         cv.addObject(o);
         sv.addObject(o);
-        rectConst.addObject(o);
         sv.addConstraint( new FixedConstraint(o.pos, [o]) );
     }
 
@@ -169,6 +173,7 @@ export function setup() {
         }
     }
 
+    // angled bases
     generateLine({
         x0: W * 0.12,
         y0: H * 0.82,
@@ -176,7 +181,7 @@ export function setup() {
         dy: 7,
         n: 7,
         r: BALL_R,
-        color: 'gray',
+        color: ANGLED_BASE_COLOR,
     });
 
     generateLine({
@@ -186,7 +191,39 @@ export function setup() {
         dy: 7,
         n: 7,
         r: BALL_R,
-        color: 'gray',
+        color: ANGLED_BASE_COLOR,
+    });
+
+    //bottom
+    generateLine({
+        x0: 0.11 * W,
+        y0: 0.945 * H,
+        dx: 27,
+        dy: 0,
+        n: 21,
+        r: BALL_R,
+        color: EDGES_COLOR
+    });
+
+    // sides
+    generateLine({
+        x0: 0.07 * W,
+        y0: 0.945 * H,
+        dx: 0,
+        dy: -27,
+        n: 35,
+        r: BALL_R,
+        color: EDGES_COLOR
+    });
+
+    generateLine({
+        x0: (1 - 0.07) * W,
+        y0: 0.945 * H,
+        dx: 0,
+        dy: -27,
+        n: 35,
+        r: BALL_R,
+        color: EDGES_COLOR
     });
 
     // add circle on click
@@ -198,7 +235,6 @@ export function setup() {
         cv.addObject(o);
         sv.addObject(o);
         gravityF.addObject(o);
-        rectConst.addObject(o);
     });
 
     // move cannon on move
@@ -214,10 +250,6 @@ export function setup() {
     const onTick = (dt, t) => {
         centerAngle += 0.25 * dt;
         updateFixedBallPositions();
-        /*if (t > 2) {
-            console.log(FIXED_BALL_POSITIONS[0]);
-            //breakpoint;
-        }*/
     };
 
     return { sv, cv, onTick };
