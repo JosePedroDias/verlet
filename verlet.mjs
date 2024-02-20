@@ -63,6 +63,12 @@ export class Solver {
         this.objects.push(o);
     }
 
+    removeObject(o) {
+        const idx = this.objects.indexOf(o);
+        if (idx === -1) return;
+        this.objects.splice(idx, 1);
+    }
+
     update(dt) {
         const subDt = dt / this.subSteps;
 
@@ -142,6 +148,12 @@ export class LinearForce {
 
     addObject(o) {
         this.objects.push(o);
+    }
+
+    removeObject(o) {
+        const idx = this.objects.indexOf(o);
+        if (idx === -1) return;
+        this.objects.splice(idx, 1);
     }
 }
 
@@ -223,6 +235,12 @@ export class RectangularConstraint {
 
     addObject(o) {
         this.objects.push(o);
+    }
+
+    removeObject(o) {
+        const idx = this.objects.indexOf(o);
+        if (idx === -1) return;
+        this.objects.splice(idx, 1);
     }
 }
 

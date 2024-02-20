@@ -19,6 +19,12 @@ export class Canvas {
         this.objects.push(o);
     }
 
+    removeObject(o) {
+        const idx = this.objects.indexOf(o);
+        if (idx === -1) return;
+        this.objects.splice(idx, 1);
+    }
+
     drawFrame() {
         this.ctx.clearRect(0, 0, this.dims[0], this.dims[1]);
         for (const o of this.objects) {
@@ -57,5 +63,26 @@ export class Rectangle extends VerletObject {
             this.dims[0],
             this.dims[1],
         );
+    }
+}
+
+export class Label extends VerletObject {
+    constructor(pos = [0, 0], color = 'red', font = '16px sans-serif') {
+        super(pos);
+        this.color = color;
+        this.font = font;
+        this.text = '';
+    }
+
+    setText(value) {
+        this.text = value;
+    }
+
+    render(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.font = this.font;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.text, this.pos[0], this.pos[1]);
     }
 }

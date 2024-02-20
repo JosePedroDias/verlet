@@ -48,7 +48,6 @@ class Cannon {
     }
 }
 
-//const KIND_AUX = 0;
 const KIND_MOVING = 1;
 const KIND_FIXED_ON_RING = 2;
 
