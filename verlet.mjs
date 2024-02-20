@@ -124,6 +124,7 @@ export class Solver {
         }
 
         //console.log(computedCollisions, totalObjects);
+        //document.title = `${computedCollisions} / ${totalObjects} (${(computedCollisions/totalObjects * 100).toFixed(1)}%)`;
     }
 }
 

@@ -19,7 +19,7 @@ function onTick(t) {
 
     const dt = t - tPrev;
 
-    document.title = `exp #${experimentNo} | fps: ${(1 / dt).toFixed(1)}`;
+    document.title = `fps: ${(1 / dt).toFixed(0)} | verlet`;
 
     sv.update(dt * 2.5); // sped it up 2.5x
     onTickInner && onTickInner(dt, t);

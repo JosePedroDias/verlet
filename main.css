@@ -11,8 +11,14 @@ canvas {
     transform: translate(-50%, -50%);
 }
 
+#experiences {
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+}
+
 #experiences a {
-    display: block;
+    /* display: block; */
     font-family: sans-serif;
     color: white;
     font-weight: bold;

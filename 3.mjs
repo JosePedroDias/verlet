@@ -8,10 +8,14 @@ const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()})`;
 //const KIND_AUX = 0;
 const KIND_MOVING = 1;
 
+const PEG_COLOR = 'blue';
+const SLOT_COLOR = 'gray';
+
 // plinko
 export function setup() {
-    const W = 700;
-    const H = 1.5 * W;
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const M = Math.min(W, H);
 
     const cv = new Canvas([W, H]);
     const sv = new Solver(
@@ -31,8 +35,9 @@ export function setup() {
     const rectConst = new RectangularConstraint([W/2, H/2], [0.82 * W, 0.86 * H], movingEntities);
     sv.addConstraint(rectConst);
 
-    const PEG_R = 4;
-    const BALL_R = 14;
+    const PEG_R = 0.0035 * M;
+    const BALL_R = 0.028 * M;
+    const SLOT_R = PEG_R * 1.2;
 
     const generateLine = ({ x0, y0, dx, dy, n, r, color }) => {
         let x = x0;
@@ -68,15 +73,23 @@ export function setup() {
     {
         const cx = W * 0.5;
         const cy = H * 0.5;
-        const dx = W * 0.07;
+        const dx = W * 0.095;
         const dy = dx * 0.85;
-        for (let yi = -7; yi <= 7; ++yi) {
-            for (let xi = -6; xi <= 5; ++xi) {
-                const isOddY = yi % 2 !== 0;
-                if (xi === -6 && !isOddY) continue;
+
+        const limitX = 4;
+        const limitY = Math.floor(H / dy * 0.3);
+
+        for (let yi = -limitY; yi <= limitY; ++yi) {
+            for (let xi = -limitX; xi <= limitX; ++xi) {
+                const isOddY = yi % 2 === 0;
+                if (
+                    (!isOddY && (xi === -limitX - 1)) ||
+                    ( isOddY && (xi ===  limitX   ))
+                ) continue;
+
                 const x = cx + (xi + (isOddY ? 0.5 : 0)) * dx;
                 const y = cy + yi * dy;
-                const o = new Circle([x, y], PEG_R, 'blue');
+                const o = new Circle([x, y], PEG_R, PEG_COLOR);
                 cv.addObject(o);
                 sv.addObject(o);
 
@@ -84,15 +97,18 @@ export function setup() {
             }
         }
 
-        for (let xi = -5; xi <= 5; ++xi) {
+        for (let xi = -limitX; xi <= limitX; ++xi) {
+            const x0 = cx + xi * dx;
+            const y0 = cy + (limitY + 1) * dy;
+            const n = 1 + Math.ceil( (H - y0) / (2 * SLOT_R) * 0.5);
             generateLine({
-                x0: cx + xi * dx,
-                y0: H * 0.83,
+                x0,
+                y0,
                 dx: 0,
-                dy: 10,
-                r: 4,
-                n : 10,
-                color: 'gray',
+                dy: 2 * SLOT_R,
+                r: SLOT_R,
+                n,
+                color: SLOT_COLOR,
             });
         }
     }

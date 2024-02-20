@@ -6,7 +6,7 @@ const to255 = () => 55 + rndI(200);
 const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()})`;
 
 class Cannon {
-    constructor(pos, width = 60, thickness = 20, color = 'red') {
+    constructor(pos, width, thickness, color) {
         this.angle = 0;
 
         this.pos = pos;
@@ -49,19 +49,20 @@ const KIND_MOVING = 1;
 const KIND_FIXED_ON_RING = 2;
 
 const ANGLED_BASE_COLOR = 'gray';
-const EDGES_COLOR = undefined;// 'gray';
+const EDGES_COLOR = 'gray';
 
 // shooter
 export function setup() {
-    const W = 700;
-    const H = 1.5 * W;
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const M = Math.min(W, H);
 
-    const BALL_R = 14;
+    const BALL_R = 0.015 * M;
 
     const ORIGIN = [W * 0.5, H * 0.07]; // where balls are shot from
 
     const CENTER = [0.5 * W, 0.47 * H];
-    const r0 = W * 0.105;
+    const r0 = M * 0.078;
     const RADIUSES = [
         r0,
         r0 + BALL_R * 2.05,
@@ -139,10 +140,7 @@ export function setup() {
         },
     );
 
-    const rect0 = new Rectangle([W/2, H/2], [0.82 * W, 0.86 * H], 'black');
-    cv.addObject(rect0);
-
-    const cannon = new Cannon(Array.from(ORIGIN), 60, 20, 'gray');
+    const cannon = new Cannon(Array.from(ORIGIN), 6*BALL_R, 2*BALL_R, 'gray');
     cv.addObject(cannon);
 
     const gravityF = new LinearForce([0, 98], movingEntities);
@@ -175,66 +173,69 @@ export function setup() {
 
     // angled bases
     generateLine({
-        x0: W * 0.12,
+        x0: BALL_R,
         y0: H * 0.82,
-        dx: 25,
-        dy: 7,
-        n: 7,
+        dx: 1.9 * BALL_R,
+        dy: 0.4 * BALL_R,
+        n: Math.floor(W / (2*BALL_R) * 0.33),
         r: BALL_R,
         color: ANGLED_BASE_COLOR,
     });
 
     generateLine({
-        x0: W * (1 - 0.12),
+        x0: W - BALL_R,
         y0: H * 0.82,
-        dx: -25,
-        dy: 7,
-        n: 7,
+        dx: -1.9 * BALL_R,
+        dy: 0.4 * BALL_R,
+        n: Math.floor(W / (2*BALL_R) * 0.33),
         r: BALL_R,
         color: ANGLED_BASE_COLOR,
     });
 
     //bottom
     generateLine({
-        x0: 0.11 * W,
-        y0: 0.945 * H,
-        dx: 27,
+        x0: -3 * BALL_R,
+        y0: H + BALL_R,
+        dx: 2 * BALL_R,
         dy: 0,
-        n: 21,
+        n: 3 + Math.floor(W / (2*BALL_R)),
         r: BALL_R,
         color: EDGES_COLOR
     });
 
     // sides
     generateLine({
-        x0: 0.07 * W,
-        y0: 0.945 * H,
+        x0: -BALL_R,
+        y0: BALL_R,
         dx: 0,
-        dy: -27,
-        n: 35,
+        dy: 2 * BALL_R,
+        n: Math.floor(H / (2*BALL_R)),
         r: BALL_R,
         color: EDGES_COLOR
     });
 
     generateLine({
-        x0: (1 - 0.07) * W,
-        y0: 0.945 * H,
+        x0: W + BALL_R,
+        y0: BALL_R,
         dx: 0,
-        dy: -27,
-        n: 35,
+        dy: 2 * BALL_R,
+        n: Math.floor(H / (2*BALL_R)),
         r: BALL_R,
         color: EDGES_COLOR
     });
 
     // add circle on click
-    cv.el.addEventListener('click', () => {
+    cv.el.addEventListener('click', (ev) => {
         const pos = addVec(ORIGIN, mulVec(cannon.width, cannon.getVersor()));
         const o = new Circle(pos, BALL_R, randomColor());
         o.kind = KIND_MOVING;
-        o.accel = mulVec(13000, cannon.getVersor());
+        o.accel = mulVec(sv.dt * 700000, cannon.getVersor());
         cv.addObject(o);
         sv.addObject(o);
         gravityF.addObject(o);
+
+        ev.preventDefault();
+        ev.stopPropagation();
     });
 
     // move cannon on move
@@ -245,6 +246,9 @@ export function setup() {
         const angle = Math.atan2(pos[1], pos[0]);
         cannon.setAngle(angle);
         //console.log((angle * RAD2DEG).toFixed(1));
+
+        ev.preventDefault();
+        //ev.stopPropagation();
     });
 
     const onTick = (dt, t) => {
