@@ -5,6 +5,10 @@ import { addVec, dist, subVec, mulVec, setVec, relativePointerPos, rndI } from '
 const to255 = () => 55 + rndI(200);
 const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()})`;
 
+const COLORED_MODE = true;
+
+const VARIANT_COLORS = ['#C33', '#C3C', '#3C3', '#33C'];
+
 class Cannon {
     constructor(pos, width, thickness, color) {
         this.angle = 0;
@@ -122,6 +126,7 @@ export function setup() {
             else if (b.kind === KIND_FIXED_ON_RING) ringBall = b;
 
             if (!ringBall) return;
+            if (a.variant !== b.variant) return;
 
             // only break apart if ball's velocity above some threshold
             const otherBall = ringBall === a ? b : a;
@@ -140,7 +145,17 @@ export function setup() {
         },
     );
 
-    const cannon = new Cannon(Array.from(ORIGIN), 6*BALL_R, 2*BALL_R, 'gray');
+    let nextCannonIndex = 0;
+    let cannon;
+
+    const updateCannon = () => {
+        if (!COLORED_MODE) return;
+        nextCannonIndex = rndI(VARIANT_COLORS.length);
+        cannon.color = VARIANT_COLORS[nextCannonIndex];
+    }
+
+    cannon = new Cannon(Array.from(ORIGIN), 6*BALL_R, 2*BALL_R, 'gray');
+    updateCannon();
     cv.addObject(cannon);
 
     const gravityF = new LinearForce([0, 98], movingEntities);
@@ -159,7 +174,10 @@ export function setup() {
         const amount = AMOUNTS[i];
         for (let j = 0; j < amount; ++j) {
             const pos = Array.from(FIXED_BALL_POSITIONS[k]);
-            const o = new Circle(pos, BALL_R, randomColor());
+            const colorIdx = rndI(VARIANT_COLORS.length);
+            const color = COLORED_MODE ? VARIANT_COLORS[colorIdx] : randomColor();
+            const o = new Circle(pos, BALL_R, color);
+            if (COLORED_MODE) o.variant = colorIdx;
             o.kind = KIND_FIXED_ON_RING;
             cv.addObject(o);
             sv.addObject(o);
@@ -227,9 +245,12 @@ export function setup() {
     // add circle on click
     cv.el.addEventListener('click', (ev) => {
         const pos = addVec(ORIGIN, mulVec(cannon.width, cannon.getVersor()));
-        const o = new Circle(pos, BALL_R, randomColor());
+        const color = COLORED_MODE ? VARIANT_COLORS[nextCannonIndex] :randomColor();
+        const o = new Circle(pos, BALL_R, color);
+        if (COLORED_MODE) o.variant = nextCannonIndex;
         o.kind = KIND_MOVING;
         o.accel = mulVec(sv.dt * 700000, cannon.getVersor());
+        updateCannon();
         cv.addObject(o);
         sv.addObject(o);
         gravityF.addObject(o);
@@ -248,7 +269,6 @@ export function setup() {
         //console.log((angle * RAD2DEG).toFixed(1));
 
         ev.preventDefault();
-        //ev.stopPropagation();
     });
 
     const onTick = (dt, t) => {
