@@ -1,9 +1,6 @@
-import { Canvas, Circle, Rectangle } from './canvas.mjs';
+import { Canvas, Circle } from './canvas.mjs';
 import { FixedConstraint, LinearForce, Solver } from './verlet.mjs';
-import { addVec, dist, subVec, mulVec, setVec, relativePointerPos, rndI } from './misc.mjs';
-
-const to255 = () => 55 + rndI(200);
-const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()})`;
+import { addVec, dist, subVec, mulVec, setVec, relativePointerPos, rndI, randomColor } from './misc.mjs';
 
 const COLORED_MODE = true;
 

@@ -1,6 +1,6 @@
 const PI2 = 2 * Math.PI;
 
-import { VerletObject } from "./verlet.mjs";
+import { VerletObject } from './verlet.mjs';
 
 export class Canvas {
     constructor(dims = [400, 300]) {

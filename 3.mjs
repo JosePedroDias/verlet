@@ -1,9 +1,6 @@
 import { Canvas, Circle, Rectangle, Label } from './canvas.mjs';
 import { RectangularConstraint, FixedConstraint, LinearForce, Solver } from './verlet.mjs';
-import { relativePointerPos, subVec, dist, rndI } from './misc.mjs';
-
-const to255 = () => 55 + rndI(200);
-const randomColor = () => `rgb(${to255()}, ${to255()}, ${to255()})`;
+import { relativePointerPos, subVec, dist, randomColor } from './misc.mjs';
 
 const KIND_MOVING = 1;
 const KIND_DETECTOR = 2;
