@@ -10,16 +10,16 @@ export function hexToCartesian([i, j]) {
     ];
 }
 
-export function generateLine(p0, [length, angle], thickness, color) {
-    const diameter = 2 * thickness;
+export function generateLine(p0, [length, angle], thickness, color, nMult = 1) {
+    let diameter = 2 * thickness;
 
     const nFloat = length / diameter;
     const nStart = nFloat - Math.floor(nFloat);
-    const n = Math.floor(nFloat);
+    const n = Math.max(1,  Math.floor(nFloat * nMult));
 
     const circles = [];
     for (let i = 0; i < n; ++i) {
-        const pos = addVec(p0, polarToCartesian([(nStart + i) * diameter, angle]));
+        const pos = addVec(p0, polarToCartesian([(nStart + i) * diameter / nMult, angle]));
         const o = new Circle(pos, thickness, color);
         circles.push(o);
     }
@@ -71,26 +71,26 @@ export function createLimitLines(p0, p1, sv, cv, thickness, kind, color) {
 
 export const HEX_FACTOR = 0.5 * Math.tan(RAD60);
 
-export function createPlinko(hexPositions, barrierCfgs, scale, r, sv, cv, color) {
+const PLINKO_BARRIER_DENSITY = 0.28;
+
+export function createPlinko(hexPositions, barrierCfgs, scale, sv, cv, pegColor, barrierColor, pegRadius, barrierRadius) {
     const sx = scale;
     const sy = scale * HEX_FACTOR;
 
     const positions = hexPositions.map(hexToCartesian).map(([x, y]) => [sx * x, sy * y]);
 
-    const circles = positions.map((pos) => new Circle(Array.from(pos), r, color));
+    const circles = positions.map((pos) => new Circle(Array.from(pos), pegRadius, pegColor));
 
     let i = 0;
     for (const o of circles) {
         sv.addObject(o);
-        color && cv.addObject(o);
+        pegColor && cv.addObject(o);
         sv.addConstraint( new FixedConstraint(positions[i++], [o], true) );
     }
 
     const barriers = [];
     let barrierCircles = [];
     const barrierPositions = [];
-    const rr = r*1.5;
-    const barrierColor = 'orange';
     i = 0;
 
     for (const [hexPos, dos] of barrierCfgs) {
@@ -99,15 +99,15 @@ export function createPlinko(hexPositions, barrierCfgs, scale, r, sv, cv, color)
         p0[1] *= sy;
 
         if (dos.indexOf(0) !== -1) {
-            const lineHor       = generateLine(p0, [scale,    0    ], rr, barrierColor);
+            const lineHor       = generateLine(p0, [scale,    0    ], barrierRadius, barrierColor, PLINKO_BARRIER_DENSITY);
             barriers.push(lineHor);       barrierCircles = barrierCircles.concat(lineHor);
         }
         if (dos.indexOf(1) !== -1) {
-            const lineBackslash = generateLine(p0, [scale, -  RAD60], rr, barrierColor);
+            const lineBackslash = generateLine(p0, [scale, -  RAD60], barrierRadius, barrierColor, PLINKO_BARRIER_DENSITY);
             barriers.push(lineBackslash); barrierCircles = barrierCircles.concat(lineBackslash);
         }
         if (dos.indexOf(2) !== -1) {
-            const lineSlash     = generateLine(p0, [scale, -2*RAD60], rr, barrierColor);
+            const lineSlash     = generateLine(p0, [scale, -2*RAD60], barrierRadius, barrierColor, PLINKO_BARRIER_DENSITY);
             barriers.push(lineSlash);     barrierCircles = barrierCircles.concat(lineSlash);
         }
     }
@@ -116,7 +116,7 @@ export function createPlinko(hexPositions, barrierCfgs, scale, r, sv, cv, color)
         const pos2 = Array.from(o.pos);
         barrierPositions.push(pos2);
         sv.addObject(o);
-        color && cv.addObject(o);
+        barrierColor && cv.addObject(o);
         sv.addConstraint( new FixedConstraint(pos2, [o], true) );
     }
 

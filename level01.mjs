@@ -1,5 +1,6 @@
 export default {
-    dropEverySecs: 5,
+    dropEverySecs: 1,
+    angle: 0,
     size: [1, 1],
     barrierCfgs: [
         [[-1,  0], [1]],

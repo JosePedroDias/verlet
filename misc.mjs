@@ -1,4 +1,5 @@
 export const RAD2DEG = 180 / Math.PI;
+export const DEG2RAD = Math.PI / 180;
 
 export const RAD45  = 0.25 * Math.PI;
 export const RAD60  = 1/3  * Math.PI;
@@ -60,7 +61,28 @@ export function extractElementOffset(el) {
     ];
 }
 
+export const hasTouchSupport = Boolean(
+    ('ontouchstart' in window) ||
+    window.DocumentTouch && window.document instanceof DocumentTouch ||
+    window.navigator.maxTouchPoints ||
+    window.navigator.msMaxTouchPoints
+);
+
+export const POINTER_EVENTS = hasTouchSupport ?
+    {
+        down: 'touchstart',
+        up:   'touchend',
+        move: 'touchmove',
+    } :
+    {
+        down: 'mousedown',
+        up:   'mouseup',
+        move: 'mousemove',
+    };
+
 export function extractMousePosition(ev) {
+    if (ev.type.substring(0, 5) === 'touch') ev = ev.touches[0];
+
     return [
         ev.pageX,
         ev.pageY,
